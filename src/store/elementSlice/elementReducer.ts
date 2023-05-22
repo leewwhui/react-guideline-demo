@@ -1,6 +1,6 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { ElementState } from "./elementSlice";
-import { ShapeElement, ShapeElementProps } from "../../config/type";
+import { ShapeElement, ShapeElementProps, positionType } from "../../config/type";
 
 export const addShapeAction = (
   state: ElementState,
@@ -21,9 +21,17 @@ export const updateShapePropsAction = (
   };
 };
 
+export const updatePositionAction = (
+  state: ElementState,
+  action: PayloadAction<{ id: string; position: positionType }>
+) => {
+  const {position, id } = action.payload;
+  state.shapes[id].position = position;
+};
+
 export const setActiveElementIdAction = (
   state: ElementState,
-  action: PayloadAction<string>
+  action: PayloadAction<string | null>
 ) => {
   state.activeId = action.payload;
 };

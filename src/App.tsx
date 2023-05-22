@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import styles from "./App.module.less";
 import { RenderElement } from "./components/renderElement";
-import { useMoveable } from "./hooks/useMoveable";
+import { DraggableData, Rnd } from "react-rnd";
 import { useGuideLines } from "./hooks/useGuideLine";
 import { GuideLine } from "./components/guideLine";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,68 +13,63 @@ import {
 import { store } from "./store/store";
 import {
   setActiveElementId,
-  updateShapeProps,
+  updatePosition,
 } from "./store/elementSlice/elementSlice";
+import { DraggableEvent } from "react-draggable";
 
 export const App = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
 
   const elements = useSelector(allShapesSelector);
-  const activeId = useSelector(getActiveElementId);
   const active = useSelector(getActiveElement);
+  const activeId = useSelector(getActiveElementId);
 
-  const { moveable, setContainer, setTargets } = useMoveable();
-  const guideLine = useGuideLines();
-
-  useEffect(() => {
-    active && guideLine.manipulateElement(elements, active);
-  }, [active]);
+  const { guideLines, setGuideLines, manipulateElement } = useGuideLines();
 
   useEffect(() => {
-    if (containerRef && containerRef.current) {
-      setContainer(containerRef.current);
+    if (active) {
+      manipulateElement(elements, active);
     }
-  }, [containerRef]);
+  }, [active?.position]);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const element = container.querySelector(`[data-element-id="${activeId}"]`);
-    setTargets([element as HTMLElement]);
-  }, [activeId]);
+    setGuideLines([]);
+  }, [activeId])
 
-  const handleOnDragElement = (delta: number[]) => {
-    const id = store.getState().element.activeId;
-    if (!id) return;
+  const updateElementPosition = (id: string, offset: [number, number]) => {
     const element = store.getState().element.shapes[id];
-
-    const props = {
-      ...element,
-      position: {
-        x: element.position.x + delta[0],
-        y: element.position.y + delta[1],
-      },
+    const position = {
+      x: element.position.x + offset[0],
+      y: element.position.y + offset[1],
     };
 
-    dispatch(updateShapeProps({ id, props }));
+    dispatch(updatePosition({ id, position }));
   };
-
-  useEffect(() => {
-    moveable.on("drag", (e) => handleOnDragElement(e.delta));
-    moveable.on("dragEnd", () => guideLine.setGuideLines([]));
-  }, [moveable]);
 
   return (
     <div className={styles["app"]} ref={containerRef}>
       {elements.map((el) => (
-        <RenderElement
-          element={el}
+        <Rnd
           key={el.id}
-          onClick={(id) => dispatch(setActiveElementId(id))}
-        />
+          position={el.position}
+          onDragStart={() => {
+            dispatch(setActiveElementId(el.id));
+          }}
+          onDrag={(e: DraggableEvent, data: DraggableData) => {
+            updateElementPosition(el.id, [data.deltaX, data.deltaY]);
+          }}
+          onDragStop={() => {
+            dispatch(setActiveElementId(null));
+          }}
+        >
+          <RenderElement
+            element={el}
+            onClick={(id) => dispatch(setActiveElementId(id))}
+          />
+        </Rnd>
       ))}
-      {guideLine.guideLines.map((guide, index) => (
+      {guideLines.map((guide, index) => (
         <GuideLine from={guide.start} to={guide.end} key={index} />
       ))}
     </div>

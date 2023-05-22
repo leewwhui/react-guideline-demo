@@ -3,6 +3,7 @@ import { ShapeElement } from "../../config/type";
 import {
   addShapeAction,
   setActiveElementIdAction,
+  updatePositionAction,
   updateShapePropsAction,
 } from "./elementReducer";
 import { cloneDeep } from "lodash";
@@ -23,12 +24,13 @@ export const elementSlice = createSlice({
   reducers: {
     addShape: addShapeAction,
     updateShapeProps: updateShapePropsAction,
+    updatePosition: updatePositionAction,
     setActiveElementId: setActiveElementIdAction,
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { addShape, updateShapeProps, setActiveElementId } =
+export const { addShape, updateShapeProps, setActiveElementId, updatePosition } =
   elementSlice.actions;
 
 export default elementSlice.reducer;

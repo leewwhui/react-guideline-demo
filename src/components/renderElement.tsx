@@ -19,12 +19,9 @@ const shapes = {
 
 export const RenderElement: FC<RenderElementProps> = (props) => {
   const { element, onClick } = props;
-  const { type, position, rotation, width, height, fill, id } = element;
+  const { type, rotation, width, height, fill, id } = element;
 
   const classes = css`
-    position: absolute;
-    left: ${position.x}px;
-    top: ${position.y}px;
     transform: rotate(${rotation}deg);
     width: ${width}px;
     height: ${height}px;

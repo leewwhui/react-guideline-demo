@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { GuideLine, ShapeElement } from "../config/type";
 import { BoundingBox } from "../config/boundingBox";
+import { GuideLineUtil } from "../config/guidelineUtil";
 
 // 1. 获取拖拽元素的 bounding box 的辅助线
 // 2. 遍历场景中的元素的 bounding box 的辅助线，并且收集相近的辅助线
 // 3. 合并辅助线
 export const useGuideLines = () => {
   const [guideLines, setGuideLines] = useState<GuideLine[]>([]);
-  const sorptionRange = 5;
 
   const manipulateElement = (
     elements: ShapeElement[],
@@ -22,6 +22,7 @@ export const useGuideLines = () => {
     elements.forEach((el) => {
       if (activeElement.id === el.id) return;
       const boundingBox = createBoundingBox(el);
+      
       horizontalLines.push(...boundingBox.getHorizontalLines());
       verticalLines.push(...boundingBox.getVerticalLines());
     });
@@ -30,37 +31,26 @@ export const useGuideLines = () => {
     const horizontalGuideLines: GuideLine[] = [];
     const verticalGuideLines: GuideLine[] = [];
 
+    if (!activeBoundingBox) return;
     horizontalLines.forEach((h) => {
       horizontalGuideLines.push(
-        ...activeBoundingBox.getRelativeHorizontalLine(h, sorptionRange)
+        ...activeBoundingBox.getRelativeHorizontalLine(h)
       );
     });
 
     verticalLines.forEach((v) => {
-      verticalGuideLines.push(
-        ...activeBoundingBox.getRelativeVerticalLine(v, sorptionRange)
-      );
+      verticalGuideLines.push(...activeBoundingBox.getRelativeVerticalLine(v));
     });
 
     // 合并辅助线
-    // setGuideLines([
-    //   ...mergeHorizontalLines(horizontalGuideLines),
-    //   ...mergeVerticalLines(verticalGuideLines),
-    // ]);
-
-    setGuideLines([...horizontalGuideLines, ...verticalGuideLines]);
+    setGuideLines([
+      ...GuideLineUtil.mergeHorizontalLines(horizontalGuideLines),
+      ...GuideLineUtil.mergeVerticalLines(verticalGuideLines),
+    ]);
   };
 
   const createBoundingBox = (element: ShapeElement) => {
     return BoundingBox.createBoundingBox(element);
-  };
-
-  const mergeHorizontalLines = (lines: GuideLine[]) => {
-    return [];
-  };
-
-  const mergeVerticalLines = (lines: GuideLine[]) => {
-    return [];
   };
 
   return {

@@ -17,7 +17,7 @@ export const GuideLine: FC<GuideLineProps> = (props) => {
     width: ${width}px;
     height: ${height}px;
     background-color: #000;
-    left: ${Math.min(from.x, to.y)}px;
+    left: ${Math.min(from.x, to.x)}px;
     top: ${Math.min(from.y, to.y)}px;
   `;
 
