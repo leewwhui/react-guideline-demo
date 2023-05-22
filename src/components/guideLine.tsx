@@ -9,14 +9,14 @@ interface GuideLineProps {
 
 export const GuideLine: FC<GuideLineProps> = (props) => {
   const { from, to } = props;
-  const width = Math.max(Math.abs(to.x - from.x), 1);
-  const height = Math.max(Math.abs(to.y - from.y), 1);
+  const width = Math.max(Math.abs(to.x - from.x), 2);
+  const height = Math.max(Math.abs(to.y - from.y), 2);
 
   const classes = css`
     position: absolute;
     width: ${width}px;
     height: ${height}px;
-    background-color: orange;
+    background-color: #000;
     left: ${Math.min(from.x, to.y)}px;
     top: ${Math.min(from.y, to.y)}px;
   `;

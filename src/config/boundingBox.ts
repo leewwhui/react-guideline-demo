@@ -1,3 +1,4 @@
+import { GuideLineUtil } from "./guidelineUtil";
 import { GuideLine, ShapeElement } from "./type";
 
 export class BoundingBox {
@@ -20,28 +21,28 @@ export class BoundingBox {
 
   private calcElementRotate() {}
 
-  getHorizontalLines() {
+  getHorizontalLines(): GuideLine[] {
     const x = this.left;
     const endX = this.left + this.width;
     const centerY = this.top + this.height / 2;
     const endY = this.top + this.height;
 
     return [
-      { start: { x, y: this.top }, end: { x: endX, y: this.top } },
-      { start: { x, y: centerY }, end: { x: endX, y: centerY } },
-      { start: { x, y: endY }, end: { x: endX, y: endY } },
+      GuideLineUtil.createGuideLine(x, this.top, endX, this.top),
+      GuideLineUtil.createGuideLine(x, centerY, endX, centerY),
+      GuideLineUtil.createGuideLine(x, endY, endX, endY),
     ];
   }
 
-  getVerticalLines() {
+  getVerticalLines(): GuideLine[] {
     const y = this.top;
     const endY = this.top + this.height;
     const centerX = this.left + this.width / 2;
     const endX = this.left + this.width;
     return [
-      { start: { x: this.left, y }, end: { x: this.left, y: endY } },
-      { start: { x: centerX, y }, end: { x: centerX, y: endY } },
-      { start: { x: endX, y }, end: { x: endX, y: endY } },
+      GuideLineUtil.createGuideLine(this.left, y, this.left, endY),
+      GuideLineUtil.createGuideLine(centerX, y, centerX, endY),
+      GuideLineUtil.createGuideLine(endX, y, endX, endY),
     ];
   }
 
@@ -50,23 +51,14 @@ export class BoundingBox {
     const results: GuideLine[] = [];
     for (let i = 0; i < selfs.length; i++) {
       const self = selfs[i];
-      if (Math.abs(self.start.y - line.start.y) === 0) {
-        const startX = Math.min(
-          line.start.x,
-          line.end.x,
-          self.start.x,
-          self.end.x
+      const startY = self.start.y;
+
+      if (GuideLineUtil.horizontalOffset(self, line) <= range) {
+        const startX = Math.min(line.start.x, self.start.x);
+        const endX = Math.max(line.end.x, self.end.x);
+        results.push(
+          GuideLineUtil.createGuideLine(startX, startY, endX, startY)
         );
-        const endX = Math.max(
-          line.start.x,
-          line.end.x,
-          self.start.x,
-          self.end.x
-        );
-        results.push({
-          start: { x: startX, y: self.start.y },
-          end: { x: endX, y: self.start.y },
-        });
       }
     }
     return results;
@@ -78,23 +70,14 @@ export class BoundingBox {
 
     for (let i = 0; i < selfs.length; i++) {
       const self = selfs[i];
-      if (Math.abs(self.start.x - line.start.x) <= 0) {
-        const startY = Math.min(
-          self.start.y,
-          self.end.y,
-          line.start.y,
-          line.end.y
+      const startX = self.start.x;
+
+      if (GuideLineUtil.verticalOffset(self, line) <= range) {
+        const startY = Math.min(self.start.y, line.start.y);
+        const endY = Math.max(self.end.y, line.end.y);
+        results.push(
+          GuideLineUtil.createGuideLine(startX, startY, startX, endY)
         );
-        const endY = Math.max(
-          self.start.y,
-          self.end.y,
-          line.start.y,
-          line.end.y
-        );
-        results.push({
-          start: { x: self.start.x, y: startY },
-          end: { x: self.start.x, y: endY },
-        });
       }
     }
     return results;
