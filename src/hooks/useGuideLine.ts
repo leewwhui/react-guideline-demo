@@ -3,11 +3,9 @@ import { GuideLine, ShapeElement } from "../config/type";
 import { BoundingBox } from "../config/boundingBox";
 import { GuideLineUtil } from "../config/guidelineUtil";
 
-// 1. 获取拖拽元素的 bounding box 的辅助线
-// 2. 遍历场景中的元素的 bounding box 的辅助线，并且收集相近的辅助线
-// 3. 合并辅助线
 export const useGuideLines = () => {
   const [guideLines, setGuideLines] = useState<GuideLine[]>([]);
+  const [sorb, setSorb] = useState<[number, number]>([0, 0]);
 
   const manipulateElement = (
     elements: ShapeElement[],
@@ -22,12 +20,26 @@ export const useGuideLines = () => {
     elements.forEach((el) => {
       if (activeElement.id === el.id) return;
       const boundingBox = createBoundingBox(el);
-      
+
       horizontalLines.push(...boundingBox.getHorizontalLines());
       verticalLines.push(...boundingBox.getVerticalLines());
     });
 
-    // 根据吸附范围(sorptionRange)进行辅助线筛选
+    // sorb
+    setSorb([
+      GuideLineUtil.calculateVerticalOffset(
+        activeBoundingBox,
+        verticalLines,
+        1
+      ),
+      GuideLineUtil.calculateHorziontalSorbOffset(
+        activeBoundingBox,
+        horizontalLines,
+        1 
+      ),
+    ]);
+
+    // 辅助线筛选
     const horizontalGuideLines: GuideLine[] = [];
     const verticalGuideLines: GuideLine[] = [];
 
@@ -57,5 +69,6 @@ export const useGuideLines = () => {
     manipulateElement,
     guideLines,
     setGuideLines,
+    sorb
   };
 };

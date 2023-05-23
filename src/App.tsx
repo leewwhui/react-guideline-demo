@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import styles from "./App.module.less";
 import { RenderElement } from "./components/renderElement";
 import { DraggableData, Rnd } from "react-rnd";
@@ -18,14 +18,19 @@ import {
 import { DraggableEvent } from "react-draggable";
 
 export const App = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
-
   const elements = useSelector(allShapesSelector);
   const active = useSelector(getActiveElement);
   const activeId = useSelector(getActiveElementId);
 
-  const { guideLines, setGuideLines, manipulateElement } = useGuideLines();
+  const { guideLines, setGuideLines, manipulateElement, sorb } =
+    useGuideLines();
+
+  useEffect(() => {
+    if (sorb[0] === 0 && sorb[1] === 0) return;
+    const id = store.getState().element.activeId;
+    id && updateElementPosition(id, sorb);
+  }, [sorb]);
 
   useEffect(() => {
     if (active) {
@@ -35,7 +40,7 @@ export const App = () => {
 
   useEffect(() => {
     setGuideLines([]);
-  }, [activeId])
+  }, [activeId]);
 
   const updateElementPosition = (id: string, offset: [number, number]) => {
     const element = store.getState().element.shapes[id];
@@ -48,7 +53,7 @@ export const App = () => {
   };
 
   return (
-    <div className={styles["app"]} ref={containerRef}>
+    <div className={styles["app"]}>
       {elements.map((el) => (
         <Rnd
           key={el.id}
