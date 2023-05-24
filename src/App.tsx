@@ -1,27 +1,31 @@
-import { useEffect } from "react";
 import styles from "./App.module.less";
 import { RenderElement } from "./components/renderElement";
-import { DraggableData, Rnd } from "react-rnd";
 import { useGuideLines } from "./hooks/useGuideLine";
 import { GuideLine } from "./components/guideLine";
 import { useDispatch, useSelector } from "react-redux";
 import {
   allShapesSelector,
   getActiveElement,
-  getActiveElementId,
 } from "./store/elementSlice/elementSelector";
 import { store } from "./store/store";
 import {
   setActiveElementId,
   updatePosition,
 } from "./store/elementSlice/elementSlice";
-import { DraggableEvent } from "react-draggable";
+import { useEffect, useRef } from "react";
+import { ShapeElement, positionType } from "./config/type";
+import { Rnd } from "./components/Rnd";
 
 export const App = () => {
   const dispatch = useDispatch();
   const elements = useSelector(allShapesSelector);
   const active = useSelector(getActiveElement);
-  const activeId = useSelector(getActiveElementId);
+
+  const elOriginPosition = useRef<positionType | null>(null);
+  const sorbPosition = useRef<positionType | null>(null);
+
+  const startMoveX = useRef<number>(0);
+  const startMoveY = useRef<number>(0);
 
   const { guideLines, setGuideLines, manipulateElement, sorb } =
     useGuideLines();
@@ -29,7 +33,21 @@ export const App = () => {
   useEffect(() => {
     if (sorb[0] === 0 && sorb[1] === 0) return;
     const id = store.getState().element.activeId;
-    id && updateElementPosition(id, sorb);
+    if (!id) return;
+    const element = store.getState().element.shapes[id];
+
+    const position = {
+      x: element.position.x + sorb[0],
+      y: element.position.y + sorb[1],
+    };
+    sorbPosition.current = position;
+
+    dispatch(
+      updatePosition({
+        id,
+        position,
+      })
+    );
   }, [sorb]);
 
   useEffect(() => {
@@ -38,18 +56,41 @@ export const App = () => {
     }
   }, [active?.position]);
 
-  useEffect(() => {
-    setGuideLines([]);
-  }, [activeId]);
+  const handleOnDragStart = (e: MouseEvent, el: ShapeElement) => {
+    elOriginPosition.current = el.position;
 
-  const updateElementPosition = (id: string, offset: [number, number]) => {
-    const element = store.getState().element.shapes[id];
-    const position = {
-      x: element.position.x + offset[0],
-      y: element.position.y + offset[1],
+    startMoveX.current = e.clientX;
+    startMoveY.current = e.clientY;
+
+    dispatch(setActiveElementId(el.id));
+  };
+
+  const handleOnDrag = (e: MouseEvent, el: ShapeElement) => {
+    const moveX = e.clientX - startMoveX.current;
+    const moveY = e.clientY - startMoveY.current;
+    if (!elOriginPosition.current) return;
+
+    let position = {
+      x: elOriginPosition.current.x + moveX,
+      y: elOriginPosition.current.y + moveY,
     };
 
-    dispatch(updatePosition({ id, position }));
+    if (sorbPosition.current) {
+      const diffX = position.x - sorbPosition.current.x;
+      const diffY = position.y - sorbPosition.current.y;
+
+      const x = Math.abs(diffX) > 10 ? position.x : sorbPosition.current.x;
+      const y = Math.abs(diffY) > 10 ? position.y : sorbPosition.current.y;
+
+      position = { x, y };
+    }
+
+    dispatch(
+      updatePosition({
+        id: el.id,
+        position,
+      })
+    );
   };
 
   return (
@@ -58,13 +99,10 @@ export const App = () => {
         <Rnd
           key={el.id}
           position={el.position}
-          onDragStart={() => {
-            dispatch(setActiveElementId(el.id));
-          }}
-          onDrag={(e: DraggableEvent, data: DraggableData) => {
-            updateElementPosition(el.id, [data.deltaX, data.deltaY]);
-          }}
+          onDragStart={(e) => handleOnDragStart(e as MouseEvent, el)}
+          onDrag={(e) => handleOnDrag(e as MouseEvent, el)}
           onDragStop={() => {
+            setGuideLines([]);
             dispatch(setActiveElementId(null));
           }}
         >

@@ -1,5 +1,5 @@
 import { BoundingBox } from "./boundingBox";
-import { GuideLine } from "./type";
+import { GuideLine, GuideLineDirection } from "./type";
 
 const abs = Math.abs;
 
@@ -10,7 +10,12 @@ export class GuideLineUtil {
     endX: number,
     endY: number
   ): GuideLine {
+    const direction =
+      startX === endX
+        ? GuideLineDirection.HORIZONTAL
+        : GuideLineDirection.VERTICAL;
     return {
+      direction,
       start: { x: startX, y: startY },
       end: { x: endX, y: endY },
     };
@@ -56,7 +61,7 @@ export class GuideLineUtil {
       }
     });
 
-    if (minOffset === Infinity) return 0;
+    if (minOffset === Infinity) return null
     return minOffset;
   }
 

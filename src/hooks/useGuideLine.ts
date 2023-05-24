@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { GuideLine, ShapeElement } from "../config/type";
 import { BoundingBox } from "../config/boundingBox";
 import { GuideLineUtil } from "../config/guidelineUtil";
@@ -6,6 +6,9 @@ import { GuideLineUtil } from "../config/guidelineUtil";
 export const useGuideLines = () => {
   const [guideLines, setGuideLines] = useState<GuideLine[]>([]);
   const [sorb, setSorb] = useState<[number, number]>([0, 0]);
+  const isHoriztontalSorb = useRef<boolean>(false);
+
+  const sorbRange = 10;
 
   const manipulateElement = (
     elements: ShapeElement[],
@@ -25,19 +28,21 @@ export const useGuideLines = () => {
       verticalLines.push(...boundingBox.getVerticalLines());
     });
 
-    // sorb
-    setSorb([
-      GuideLineUtil.calculateVerticalOffset(
-        activeBoundingBox,
-        verticalLines,
-        1
-      ),
-      GuideLineUtil.calculateHorziontalSorbOffset(
-        activeBoundingBox,
-        horizontalLines,
-        1 
-      ),
-    ]);
+    const verticalOffset = GuideLineUtil.calculateVerticalOffset(
+      activeBoundingBox,
+      verticalLines,
+      sorbRange
+    );
+
+    const horizontalOffset = GuideLineUtil.calculateHorziontalSorbOffset(
+      activeBoundingBox,
+      horizontalLines,
+      sorbRange
+    );
+
+    if (horizontalOffset !== null) isHoriztontalSorb.current = true;
+    else isHoriztontalSorb.current = false;
+    setSorb([verticalOffset, horizontalOffset || 0]);
 
     // 辅助线筛选
     const horizontalGuideLines: GuideLine[] = [];
@@ -69,6 +74,7 @@ export const useGuideLines = () => {
     manipulateElement,
     guideLines,
     setGuideLines,
-    sorb
+    isHoriztontalSorb: isHoriztontalSorb.current,
+    sorb,
   };
 };
