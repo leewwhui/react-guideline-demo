@@ -3,17 +3,22 @@ import { GuideLine, ShapeElement } from "../config/type";
 import { BoundingBox } from "../config/boundingBox";
 import { GuideLineUtil } from "../config/guidelineUtil";
 
+interface DragElementConfig {
+  sorbRange: number;
+}
+
 export const useGuideLines = () => {
   const [guideLines, setGuideLines] = useState<GuideLine[]>([]);
   const [sorb, setSorb] = useState<[number, number]>([0, 0]);
   const isHoriztontalSorb = useRef<boolean>(false);
 
-  const sorbRange = 10;
-
   const manipulateElement = (
     elements: ShapeElement[],
-    activeElement: ShapeElement
+    activeElement: ShapeElement,
+    config: DragElementConfig
   ) => {
+    const { sorbRange } = config;
+
     const horizontalLines: GuideLine[] = [];
     const verticalLines: GuideLine[] = [];
 
@@ -28,27 +33,26 @@ export const useGuideLines = () => {
       verticalLines.push(...boundingBox.getVerticalLines());
     });
 
-    const verticalOffset = GuideLineUtil.calculateVerticalOffset(
+    const verticalSorb = GuideLineUtil.calculateVerticalOffset(
       activeBoundingBox,
       verticalLines,
       sorbRange
     );
 
-    const horizontalOffset = GuideLineUtil.calculateHorziontalSorbOffset(
+    const horizontalSorb = GuideLineUtil.calculateHorziontalSorbOffset(
       activeBoundingBox,
       horizontalLines,
       sorbRange
     );
 
-    if (horizontalOffset !== null) isHoriztontalSorb.current = true;
+    if (horizontalSorb !== null) isHoriztontalSorb.current = true;
     else isHoriztontalSorb.current = false;
-    setSorb([verticalOffset, horizontalOffset || 0]);
+    setSorb([verticalSorb || 0, horizontalSorb || 0]);
 
     // 辅助线筛选
     const horizontalGuideLines: GuideLine[] = [];
     const verticalGuideLines: GuideLine[] = [];
 
-    if (!activeBoundingBox) return;
     horizontalLines.forEach((h) => {
       horizontalGuideLines.push(
         ...activeBoundingBox.getRelativeHorizontalLine(h)

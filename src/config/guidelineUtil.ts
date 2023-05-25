@@ -1,5 +1,5 @@
 import { BoundingBox } from "./boundingBox";
-import { GuideLine, GuideLineDirection } from "./type";
+import { GuideLine, GuideLineType } from "./type";
 
 const abs = Math.abs;
 
@@ -8,14 +8,11 @@ export class GuideLineUtil {
     startX: number,
     startY: number,
     endX: number,
-    endY: number
+    endY: number,
+    type: GuideLineType
   ): GuideLine {
-    const direction =
-      startX === endX
-        ? GuideLineDirection.HORIZONTAL
-        : GuideLineDirection.VERTICAL;
     return {
-      direction,
+      type,
       start: { x: startX, y: startY },
       end: { x: endX, y: endY },
     };
@@ -38,30 +35,24 @@ export class GuideLineUtil {
     let minOffset = Infinity;
 
     lines.forEach((line) => {
-      const topOffset = GuideLineUtil.horizontalOffset(line, top);
-      const centerOffset = GuideLineUtil.horizontalOffset(line, center);
-      const bottomOffset = GuideLineUtil.horizontalOffset(line, bottom);
+      const t_diff = GuideLineUtil.horizontalOffset(line, top);
+      const c_diff = GuideLineUtil.horizontalOffset(line, center);
+      const b_diff = GuideLineUtil.horizontalOffset(line, bottom);
 
-      if (abs(topOffset) <= sorbRange && abs(topOffset) < abs(minOffset)) {
-        minOffset = topOffset;
+      if (abs(t_diff) <= sorbRange && abs(t_diff) < abs(minOffset)) {
+        minOffset = t_diff;
       }
 
-      if (
-        abs(centerOffset) <= sorbRange &&
-        abs(centerOffset) < abs(minOffset)
-      ) {
-        minOffset = centerOffset;
+      if (abs(c_diff) <= sorbRange && abs(c_diff) < abs(minOffset)) {
+        minOffset = c_diff;
       }
 
-      if (
-        abs(bottomOffset) <= sorbRange &&
-        abs(bottomOffset) < abs(minOffset)
-      ) {
-        minOffset = bottomOffset;
+      if (abs(b_diff) <= sorbRange && abs(b_diff) < abs(minOffset)) {
+        minOffset = b_diff;
       }
     });
 
-    if (minOffset === Infinity) return null
+    if (minOffset === Infinity) return null;
     return minOffset;
   }
 
@@ -70,7 +61,29 @@ export class GuideLineUtil {
     lines: GuideLine[],
     sorbRange: number
   ) {
-    return 0;
+    const [top, center, bottom] = boundingBox.getVerticalLines();
+    let minOffset = Infinity;
+
+    lines.forEach((line) => {
+      const t_diff = GuideLineUtil.verticalOffset(line, top);
+      const c_diff = GuideLineUtil.verticalOffset(line, center);
+      const b_diff = GuideLineUtil.verticalOffset(line, bottom);
+
+      if (abs(t_diff) <= sorbRange && abs(t_diff) < abs(minOffset)) {
+        minOffset = t_diff;
+      }
+
+      if (abs(c_diff) <= sorbRange && abs(c_diff) < abs(minOffset)) {
+        minOffset = c_diff;
+      }
+
+      if (abs(b_diff) <= sorbRange && abs(b_diff) < abs(minOffset)) {
+        minOffset = b_diff;
+      }
+    });
+
+    if (minOffset === Infinity) return null;
+    return minOffset;
   }
 
   static mergeHorizontalLines(lines: GuideLine[]) {

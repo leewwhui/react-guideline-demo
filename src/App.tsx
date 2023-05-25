@@ -27,6 +27,8 @@ export const App = () => {
   const startMoveX = useRef<number>(0);
   const startMoveY = useRef<number>(0);
 
+  const sorbRange = 5;
+
   const { guideLines, setGuideLines, manipulateElement, sorb } =
     useGuideLines();
 
@@ -52,7 +54,7 @@ export const App = () => {
 
   useEffect(() => {
     if (active) {
-      manipulateElement(elements, active);
+      manipulateElement(elements, active, { sorbRange });
     }
   }, [active?.position]);
 
@@ -79,8 +81,10 @@ export const App = () => {
       const diffX = position.x - sorbPosition.current.x;
       const diffY = position.y - sorbPosition.current.y;
 
-      const x = Math.abs(diffX) > 10 ? position.x : sorbPosition.current.x;
-      const y = Math.abs(diffY) > 10 ? position.y : sorbPosition.current.y;
+      const x =
+        Math.abs(diffX) > sorbRange ? position.x : sorbPosition.current.x;
+      const y =
+        Math.abs(diffY) > sorbRange ? position.y : sorbPosition.current.y;
 
       position = { x, y };
     }

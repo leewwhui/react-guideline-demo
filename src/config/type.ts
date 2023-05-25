@@ -5,9 +5,14 @@ export enum ElementEnums {
   RECTANGLE = 'rectangle'
 }
 
-export enum GuideLineDirection {
-  HORIZONTAL = 'horizontal',
-  VERTICAL = 'vertical'
+export enum GuideLineType {
+HORIZONTAL_TOP = 'horizontal-top',
+HORIZONTAL_CENTER = 'horizontal-center',
+HORIZONTAL_BOTTOM = 'horizontal-bottom',
+
+VERTICAL_TOP = 'vertical-top',
+VERTICAL_CENTER = 'vertical-center',
+VERTICAL_BOTTOM = 'vertical-bottom',
 }
 
 export interface ShapeElementProps {
@@ -31,7 +36,7 @@ export interface BoundingBoxProps {
 }
 
 export interface GuideLine {
-  direction: GuideLineDirection
+  type: GuideLineType
   start: positionType;
   end: positionType;
 }

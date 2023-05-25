@@ -1,5 +1,5 @@
 import { GuideLineUtil } from "./guidelineUtil";
-import { GuideLine, ShapeElement } from "./type";
+import { GuideLine, GuideLineType, ShapeElement } from "./type";
 
 export class BoundingBox {
   private _left: number;
@@ -26,10 +26,13 @@ export class BoundingBox {
     const centerY = this.top + this.height / 2;
     const endY = this.top + this.height;
 
+    const top = GuideLineType.HORIZONTAL_TOP;
+    const center = GuideLineType.HORIZONTAL_CENTER;
+    const bottom = GuideLineType.HORIZONTAL_BOTTOM;
     return [
-      GuideLineUtil.createGuideLine(x, y, endX, y),
-      GuideLineUtil.createGuideLine(x, centerY, endX, centerY),
-      GuideLineUtil.createGuideLine(x, endY, endX, endY),
+      GuideLineUtil.createGuideLine(x, y, endX, y, top),
+      GuideLineUtil.createGuideLine(x, centerY, endX, centerY, center),
+      GuideLineUtil.createGuideLine(x, endY, endX, endY, bottom),
     ];
   }
 
@@ -39,10 +42,14 @@ export class BoundingBox {
     const endY = this.top + this.height;
     const centerX = this.left + this.width / 2;
     const endX = this.left + this.width;
+
+    const top = GuideLineType.VERTICAL_TOP;
+    const center = GuideLineType.VERTICAL_CENTER;
+    const bottom = GuideLineType.VERTICAL_BOTTOM;
     return [
-      GuideLineUtil.createGuideLine(x, y, x, endY),
-      GuideLineUtil.createGuideLine(centerX, y, centerX, endY),
-      GuideLineUtil.createGuideLine(endX, y, endX, endY),
+      GuideLineUtil.createGuideLine(x, y, x, endY, top),
+      GuideLineUtil.createGuideLine(centerX, y, centerX, endY, center),
+      GuideLineUtil.createGuideLine(endX, y, endX, endY, bottom),
     ];
   }
 
@@ -57,7 +64,7 @@ export class BoundingBox {
         const startX = Math.min(line.start.x, self.start.x);
         const endX = Math.max(line.end.x, self.end.x);
         results.push(
-          GuideLineUtil.createGuideLine(startX, startY, endX, startY)
+          GuideLineUtil.createGuideLine(startX, startY, endX, startY, self.type)
         );
       }
     }
@@ -76,7 +83,7 @@ export class BoundingBox {
         const startY = Math.min(self.start.y, line.start.y);
         const endY = Math.max(self.end.y, line.end.y);
         results.push(
-          GuideLineUtil.createGuideLine(startX, startY, startX, endY)
+          GuideLineUtil.createGuideLine(startX, startY, startX, endY, self.type)
         );
       }
     }
