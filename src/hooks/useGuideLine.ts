@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { GuideLine, ShapeElement } from "../config/type";
+import { useState } from "react";
+import { GuideLine, ShapeElement, SorbData } from "../config/type";
 import { BoundingBox } from "../config/boundingBox";
 import { GuideLineUtil } from "../config/guidelineUtil";
 
@@ -9,8 +9,7 @@ interface DragElementConfig {
 
 export const useGuideLines = () => {
   const [guideLines, setGuideLines] = useState<GuideLine[]>([]);
-  const [sorb, setSorb] = useState<[number, number]>([0, 0]);
-  const isHoriztontalSorb = useRef<boolean>(false);
+  const [sorb, setSorb] = useState<SorbData | null>(null);
 
   const manipulateElement = (
     elements: ShapeElement[],
@@ -33,21 +32,35 @@ export const useGuideLines = () => {
       verticalLines.push(...boundingBox.getVerticalLines());
     });
 
-    const verticalSorb = GuideLineUtil.calculateVerticalOffset(
+    const xAxisSorb = GuideLineUtil.calculateXAxisOffset(
       activeBoundingBox,
       verticalLines,
       sorbRange
     );
 
-    const horizontalSorb = GuideLineUtil.calculateHorziontalSorbOffset(
+    const yAxisSorb = GuideLineUtil.calculateYAxisSorbOffset(
       activeBoundingBox,
       horizontalLines,
       sorbRange
     );
 
-    if (horizontalSorb !== null) isHoriztontalSorb.current = true;
-    else isHoriztontalSorb.current = false;
-    setSorb([verticalSorb || 0, horizontalSorb || 0]);
+    if (xAxisSorb !== null || yAxisSorb !== null) {
+      const sorbData: SorbData = {
+        offset: [xAxisSorb || 0, yAxisSorb || 0],
+        position: {
+          x: activeBoundingBox.date.left + (xAxisSorb || 0),
+          y: activeBoundingBox.date.top + (yAxisSorb || 0),
+        },
+        sorbRange,
+        isXAxisSorbed: xAxisSorb !== null,
+        isYAxisSorbed: yAxisSorb !== null,
+        sorbedElement: activeElement,
+      };
+
+      setSorb(sorbData);
+    } else {
+      setSorb(null);
+    }
 
     // 辅助线筛选
     const horizontalGuideLines: GuideLine[] = [];
@@ -78,7 +91,6 @@ export const useGuideLines = () => {
     manipulateElement,
     guideLines,
     setGuideLines,
-    isHoriztontalSorb: isHoriztontalSorb.current,
     sorb,
   };
 };

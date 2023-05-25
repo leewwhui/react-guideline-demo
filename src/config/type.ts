@@ -40,3 +40,12 @@ export interface GuideLine {
   start: positionType;
   end: positionType;
 }
+
+export interface SorbData {
+  offset: [number, number];
+  position: positionType;
+  sorbRange: number;
+  isXAxisSorbed: boolean;
+  isYAxisSorbed: boolean;
+  sorbedElement: ShapeElement;
+}

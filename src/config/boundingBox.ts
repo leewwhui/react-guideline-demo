@@ -2,16 +2,16 @@ import { GuideLineUtil } from "./guidelineUtil";
 import { GuideLine, GuideLineType, ShapeElement } from "./type";
 
 export class BoundingBox {
-  private _left: number;
-  private _top: number;
-  private _width: number;
-  private _height: number;
+  private left: number;
+  private top: number;
+  private width: number;
+  private height: number;
 
   constructor(left: number, top: number, width: number, height: number) {
-    this._left = left;
-    this._top = top;
-    this._width = width;
-    this._height = height;
+    this.left = left;
+    this.top = top;
+    this.width = width;
+    this.height = height;
   }
 
   static createBoundingBox(element: ShapeElement) {
@@ -60,7 +60,7 @@ export class BoundingBox {
       const self = selfs[i];
       const startY = self.start.y;
 
-      if (GuideLineUtil.horizontalOffset(self, line) === 0) {
+      if (GuideLineUtil.yAxisOffset(self, line) === 0) {
         const startX = Math.min(line.start.x, self.start.x);
         const endX = Math.max(line.end.x, self.end.x);
         results.push(
@@ -79,7 +79,7 @@ export class BoundingBox {
       const self = selfs[i];
       const startX = self.start.x;
 
-      if (GuideLineUtil.verticalOffset(self, line) === 0) {
+      if (GuideLineUtil.xAxisOffset(self, line) === 0) {
         const startY = Math.min(self.start.y, line.start.y);
         const endY = Math.max(self.end.y, line.end.y);
         results.push(
@@ -90,19 +90,12 @@ export class BoundingBox {
     return results;
   }
 
-  get left() {
-    return this._left;
-  }
-
-  get top() {
-    return this._top;
-  }
-
-  get width() {
-    return this._width;
-  }
-
-  get height() {
-    return this._height;
+  get date () {
+    return {
+      left: this.left,
+      top: this.top,
+      width: this.width,
+      height: this.height,
+    };
   }
 }

@@ -7,14 +7,14 @@ import {
   allShapesSelector,
   getActiveElement,
 } from "./store/elementSlice/elementSelector";
-import { store } from "./store/store";
 import {
   setActiveElementId,
   updatePosition,
 } from "./store/elementSlice/elementSlice";
 import { useEffect, useRef } from "react";
-import { ShapeElement, positionType } from "./config/type";
+import { ShapeElement, SorbData, positionType } from "./config/type";
 import { Rnd } from "./components/Rnd";
+import { store } from "./store/store";
 
 export const App = () => {
   const dispatch = useDispatch();
@@ -22,32 +22,26 @@ export const App = () => {
   const active = useSelector(getActiveElement);
 
   const elOriginPosition = useRef<positionType | null>(null);
-  const sorbPosition = useRef<positionType | null>(null);
 
   const startMoveX = useRef<number>(0);
   const startMoveY = useRef<number>(0);
 
   const sorbRange = 5;
+  const sorbData = useRef<SorbData | null>(null);
 
   const { guideLines, setGuideLines, manipulateElement, sorb } =
     useGuideLines();
 
   useEffect(() => {
-    if (sorb[0] === 0 && sorb[1] === 0) return;
-    const id = store.getState().element.activeId;
-    if (!id) return;
-    const element = store.getState().element.shapes[id];
-
-    const position = {
-      x: element.position.x + sorb[0],
-      y: element.position.y + sorb[1],
-    };
-    sorbPosition.current = position;
-
+    if (sorb === null) {
+      sorbData.current = null;
+      return;
+    }
+    sorbData.current = sorb;
     dispatch(
       updatePosition({
-        id,
-        position,
+        id: sorb.sorbedElement.id,
+        position: sorb.position,
       })
     );
   }, [sorb]);
@@ -77,16 +71,21 @@ export const App = () => {
       y: elOriginPosition.current.y + moveY,
     };
 
-    if (sorbPosition.current) {
-      const diffX = position.x - sorbPosition.current.x;
-      const diffY = position.y - sorbPosition.current.y;
+    if (sorbData.current) {
+      const { isXAxisSorbed, isYAxisSorbed, sorbedElement } = sorbData.current;
 
-      const x =
-        Math.abs(diffX) > sorbRange ? position.x : sorbPosition.current.x;
-      const y =
-        Math.abs(diffY) > sorbRange ? position.y : sorbPosition.current.y;
+      const elPosition = store.getState().element.shapes[sorbedElement.id]
 
-      position = { x, y };
+      const diffX = position.x - elPosition.position.x;
+      const diffY = position.y - elPosition.position.y;
+
+      if (isYAxisSorbed && Math.abs(diffY) <= sorbRange) {
+        position.y = elPosition.position.y;
+      }
+
+      if (isXAxisSorbed && Math.abs(diffX) <= sorbRange) {
+        position.x = elPosition.position.x;
+      }
     }
 
     dispatch(

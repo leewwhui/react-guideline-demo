@@ -18,15 +18,15 @@ export class GuideLineUtil {
     };
   }
 
-  static horizontalOffset(line1: GuideLine, line2: GuideLine) {
+  static yAxisOffset(line1: GuideLine, line2: GuideLine) {
     return line1.start.y - line2.start.y;
   }
 
-  static verticalOffset(line1: GuideLine, line2: GuideLine) {
+  static xAxisOffset(line1: GuideLine, line2: GuideLine) {
     return line1.start.x - line2.start.x;
   }
 
-  static calculateHorziontalSorbOffset(
+  static calculateYAxisSorbOffset(
     boundingBox: BoundingBox,
     lines: GuideLine[],
     sorbRange: number
@@ -35,9 +35,9 @@ export class GuideLineUtil {
     let minOffset = Infinity;
 
     lines.forEach((line) => {
-      const t_diff = GuideLineUtil.horizontalOffset(line, top);
-      const c_diff = GuideLineUtil.horizontalOffset(line, center);
-      const b_diff = GuideLineUtil.horizontalOffset(line, bottom);
+      const t_diff = GuideLineUtil.yAxisOffset(line, top);
+      const c_diff = GuideLineUtil.yAxisOffset(line, center);
+      const b_diff = GuideLineUtil.yAxisOffset(line, bottom);
 
       if (abs(t_diff) <= sorbRange && abs(t_diff) < abs(minOffset)) {
         minOffset = t_diff;
@@ -56,7 +56,7 @@ export class GuideLineUtil {
     return minOffset;
   }
 
-  static calculateVerticalOffset(
+  static calculateXAxisOffset(
     boundingBox: BoundingBox,
     lines: GuideLine[],
     sorbRange: number
@@ -65,9 +65,9 @@ export class GuideLineUtil {
     let minOffset = Infinity;
 
     lines.forEach((line) => {
-      const t_diff = GuideLineUtil.verticalOffset(line, top);
-      const c_diff = GuideLineUtil.verticalOffset(line, center);
-      const b_diff = GuideLineUtil.verticalOffset(line, bottom);
+      const t_diff = GuideLineUtil.xAxisOffset(line, top);
+      const c_diff = GuideLineUtil.xAxisOffset(line, center);
+      const b_diff = GuideLineUtil.xAxisOffset(line, bottom);
 
       if (abs(t_diff) <= sorbRange && abs(t_diff) < abs(minOffset)) {
         minOffset = t_diff;
